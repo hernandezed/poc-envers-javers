@@ -1,15 +1,12 @@
 package com.santander.tecnologica.poc.envers;
 
 import org.hibernate.annotations.GenericGenerator;
-import org.hibernate.envers.Audited;
 
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
-import java.util.UUID;
 
 @Entity
-@Audited
 public class Person {
 
     @Id

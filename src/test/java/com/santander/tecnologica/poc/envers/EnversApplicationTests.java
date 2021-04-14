@@ -1,12 +1,11 @@
 package com.santander.tecnologica.poc.envers;
 
+import org.javers.core.Javers;
+import org.javers.repository.jql.JqlQuery;
+import org.javers.repository.jql.QueryBuilder;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.data.envers.repository.support.EnversRevisionRepositoryFactoryBean;
-import org.springframework.data.history.Revision;
-import org.springframework.data.history.RevisionMetadata;
-import org.springframework.data.history.Revisions;
 import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.test.context.DynamicPropertyRegistry;
@@ -15,18 +14,19 @@ import org.testcontainers.containers.MariaDBContainer;
 import org.testcontainers.containers.wait.strategy.Wait;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
+import org.testcontainers.shaded.com.fasterxml.jackson.core.JsonProcessingException;
+import org.testcontainers.shaded.com.fasterxml.jackson.databind.ObjectMapper;
 
 import javax.persistence.EntityManager;
+import javax.transaction.Transactional;
 
-import java.math.BigInteger;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.tuple;
 
 @SpringBootTest
 @Testcontainers
 @EnableJpaAuditing
-@EnableJpaRepositories(repositoryFactoryBeanClass = EnversRevisionRepositoryFactoryBean.class)
+@EnableJpaRepositories
 class EnversApplicationTests {
 
     @Container
@@ -42,15 +42,22 @@ class EnversApplicationTests {
         registry.add("spring.datasource.username", () -> mariadb.getUsername());
         registry.add("spring.datasource.password", () -> mariadb.getPassword());
         registry.add("spring.datasource.driver-class-name", () -> mariadb.getDriverClassName());
+        registry.add("spring.datasource.driver-class-name", () -> mariadb.getDriverClassName());
+        registry.add("spring.datasource.driver-class-name", () -> mariadb.getDriverClassName());
+        registry.add("spring.datasource.driver-class-name", () -> mariadb.getDriverClassName());
+        registry.add("spring.datasource.driver-class-name", () -> mariadb.getDriverClassName());
     }
 
     @Autowired
     private PersonRepository personRepository;
     @Autowired
     private EntityManager entityManager;
+    @Autowired
+    Javers javers;
 
     @Test
-    void savePerson() {
+    @Transactional
+    void savePerson() throws JsonProcessingException {
         Person person = new Person("Eduardo", "Hernandez");
         Person newPerson = personRepository.save(person);
 
@@ -58,32 +65,8 @@ class EnversApplicationTests {
         updatePerson.setUuid(newPerson.getUuid());
         updatePerson = personRepository.save(updatePerson);
 
-        assertThat(newPerson).usingRecursiveComparison().ignoringExpectedNullFields().isEqualTo(person);
-        assertThat(newPerson).usingRecursiveComparison().ignoringExpectedNullFields().isNotEqualTo(updatePerson);
-        assertThat(newPerson.getUuid()).isEqualTo(updatePerson.getUuid());
-
-        Revisions<Long, Person> personRevisions = personRepository.findRevisions(updatePerson.getUuid());
-        assertThat(personRevisions.getContent()).hasSize(2)
-                .extracting(rev -> tuple(rev.getEntity().getUuid(), rev.getEntity().getName(), rev.getEntity().getSurname(), rev.getMetadata().getRevisionType()))
-                .containsExactlyInAnyOrder(tuple(newPerson.getUuid(), newPerson.getName(), newPerson.getSurname(), RevisionMetadata.RevisionType.INSERT),
-                        tuple(updatePerson.getUuid(), updatePerson.getName(), updatePerson.getSurname(), RevisionMetadata.RevisionType.UPDATE));
-
-        Revision<Long, Person> lastPersonRevision = personRepository.findLastChangeRevision(updatePerson.getUuid()).get();
-
-        assertThat(lastPersonRevision.getMetadata().getRevisionType())
-                .usingRecursiveComparison()
-                .isEqualTo(RevisionMetadata.RevisionType.UPDATE);
-        assertThat(lastPersonRevision.getEntity())
-                .usingRecursiveComparison()
-                .isEqualTo(updatePerson);
-
-        Revision<Long, Person> firstRevision = personRepository.findRevision(updatePerson.getUuid(), 1l).get();
-        assertThat(firstRevision.getMetadata().getRevisionType())
-                .usingRecursiveComparison()
-                .isEqualTo(RevisionMetadata.RevisionType.INSERT);
-        assertThat(firstRevision.getEntity())
-                .usingRecursiveComparison()
-                .isEqualTo(newPerson);
+        assertThat(javers.findChanges(QueryBuilder.byInstanceId(newPerson.getUuid(),Person.class).build()).size())
+                .isEqualTo(5);
 
 
     }
