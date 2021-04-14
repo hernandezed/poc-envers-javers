@@ -1,4 +1,4 @@
-package com.santander.tecnologica.poc.envers;
+package com.edh.poc.envers;
 
 import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.envers.Audited;
