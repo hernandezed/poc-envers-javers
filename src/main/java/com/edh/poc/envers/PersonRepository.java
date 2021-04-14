@@ -1,4 +1,4 @@
-package com.santander.tecnologica.poc.envers;
+package com.edh.poc.envers;
 
 import org.javers.spring.annotation.JaversSpringDataAuditable;
 import org.springframework.data.jpa.repository.JpaRepository;

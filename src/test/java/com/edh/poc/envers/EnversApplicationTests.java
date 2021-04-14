@@ -1,4 +1,4 @@
-package com.santander.tecnologica.poc.envers;
+package com.edh.poc.envers;
 
 import org.javers.core.Javers;
 import org.javers.repository.jql.JqlQuery;
@@ -15,7 +15,6 @@ import org.testcontainers.containers.wait.strategy.Wait;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 import org.testcontainers.shaded.com.fasterxml.jackson.core.JsonProcessingException;
-import org.testcontainers.shaded.com.fasterxml.jackson.databind.ObjectMapper;
 
 import javax.persistence.EntityManager;
 import javax.transaction.Transactional;

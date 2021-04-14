@@ -1,4 +1,4 @@
-package com.santander.tecnologica.poc.envers;
+package com.edh.poc.envers;
 
 import org.javers.core.Javers;
 import org.javers.core.MappingStyle;
