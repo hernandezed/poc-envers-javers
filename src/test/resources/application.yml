@@ -1,0 +1,15 @@
+spring:
+  jpa:
+    hibernate:
+      ddl-auto: none
+    properties:
+      org:
+        hibernate:
+          envers:
+            audit_table_prefix: "AUDIT_LOG_"
+            audit_table_suffix: ""
+  datasource:
+    initialization-mode: always
+logging:
+  level:
+    jpa: debug
